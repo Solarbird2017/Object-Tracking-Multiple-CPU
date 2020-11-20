@@ -7,7 +7,9 @@ The filtering algorithm is able to track the objects without training.
 3. hpc_mini, hpc_adaptive, hpc_local, hpc_hybrid refers to different information transfer algorithms between CPUs.
 3. The features of the targets can be defined for object tracking.
 
-<p align="center"><source src=https://github.com/Solarbird2017/Object-Tracking-Multiple-CPUs/blob/main/myvideo_50.avi type=video/mp4></p>
+
+<p align="center"><img src=https://github.com/Solarbird2017/Object-Tracking-single-cpu/blob/main/41.png alt="Comparison"></p>
+
 
 
 
