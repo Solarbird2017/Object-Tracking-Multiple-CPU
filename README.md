@@ -1,6 +1,4 @@
 # Object-Tracking-Multiple-CPU
-
-# Object-Tracking-Multiple-CPU
 This is the C++ code for object tracking with particle filtering algorithm with adaptive and hybrid techniques.
 The filtering algorithm is able to track the objects without training.
 
