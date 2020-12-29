@@ -21,7 +21,7 @@ The code was tested on Mac and linux platorms.
 2. install OpenMPI
 3. export TMPDIR=/tmp
 4. mpicxx main.cpp `pkg-config opencv --libs` -w
-5. mpirun -np 128 ./a.out 1000  // 128: use 128 CPUs, a.out: executed file, 1000: 1000 particles per CPU.
+5. mpirun -np 128 ./a.out 1000  // np: the number of cpus, 128: use 128 CPUs, a.out: executed file, 1000: 1000 particles per CPU.
 
 ## Tracking accuracy
 
