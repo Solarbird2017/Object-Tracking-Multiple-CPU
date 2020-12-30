@@ -26,13 +26,7 @@ public:
 };
 
 bool readRGBtxt(std::string filename, std::vector<std::vector<pix> >& RGB){
-    int rows, cols, x;
-    //    int counter = 0;
-    //    pix tempPix;
-    
-    
-    //    std::cout << filename << std::endl;
-    
+    int rows, cols, x;    
     std::ifstream inFile;
     inFile.open(filename);
     if (!inFile) {
@@ -70,43 +64,6 @@ bool readRGBtxt(std::string filename, std::vector<std::vector<pix> >& RGB){
     inFile.close();
     return true;
 }
-
-//void RGBToMat(const std::vector<std::vector<pix> >& RGB, Mat& frame){
-//
-//    int debugging = 0;
-//    MatIterator_<Vec3b> color_it, color_end;
-//    int rows = RGB.size();
-//    int cols = RGB[0].size();
-//    int rid=0, cid=0;
-//
-//    frame = Mat::zeros(rows, cols, CV_8UC3);
-////        std::cout<<"rows: "<< rows <<", cols: "<< cols << std::endl;
-//    int counter = 0;
-//
-//    for(color_it = frame.begin<Vec3b>(), color_end = frame.end<Vec3b>();
-//        color_it != color_end; ++color_it) {
-//        cid = counter%cols;
-//        rid = counter/cols;
-//
-////                cout<< "counter: "<< counter<<", rows: "<< rid <<", cols: "<< cid <<endl;
-//
-//
-//        (*color_it)[0] = (uchar)RGB[rid][cid].r; // blue
-//        (*color_it)[1] = (uchar)RGB[rid][cid].g; // green
-//        (*color_it)[2] = (uchar)RGB[rid][cid].b; // red
-//        //        cout<< "b: "<< RGB[rid][cid].b<<", g: "<< RGB[rid][cid].g <<", r: "<< RGB[rid][cid].r <<endl;
-//        //        (*color_it)[0] = 0; // blue
-//        //        (*color_it)[1] = 255; // green
-//        //        (*color_it)[2] = 0; // red
-//
-//        counter++;
-//
-//        debugging++;
-//        //        if(2000 <= debugging)
-//        //            break;
-//    }
-//
-//}
 
 void readGT(std::string filename, std::vector<std::pair<int, int> >& GT){
     int x;
