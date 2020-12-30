@@ -229,22 +229,6 @@ int checkgoodParVec(std::vector<std::vector<int> > goodParVec){
 
 
 void Histogram(std::vector<int> oriVec, std::vector< std::pair<int,int> >& results){
-//    oriVec.clear();
-//    oriVec.push_back(13);
-//    oriVec.push_back(3);
-//    oriVec.push_back(3);
-//    oriVec.push_back(6);
-//    oriVec.push_back(4);
-//    oriVec.push_back(4);
-//    oriVec.push_back(5);
-//    oriVec.push_back(8);
-//    oriVec.push_back(50);
-//    std::cout << "---- a ---- oriVec.size(): " << oriVec.size() << std::endl;
-
-
-//    for(auto t : oriVec)
-//        std::cout << t << ", ";
-//    std::cout << std::endl;
     int maxVal = *(std::max_element(oriVec.begin(),oriVec.end()));
 
     std::vector<int> temVec(maxVal+1, 0);
@@ -258,12 +242,6 @@ void Histogram(std::vector<int> oriVec, std::vector< std::pair<int,int> >& resul
             results.push_back(std::make_pair(i,temVec[i]));
         }
     }
-//    std::cout << "---- d ----" << std::endl;
-//    std::cout << "----------------------" << std::endl;
-//    for(int i=0, ter=results.size(); i<ter; i++){
-//        std::cout<<"Parid: "<<results[i].first<<", #: "<<results[i].second<<std::endl;
-//    }
-//    std::cout << "----------------------" << std::endl;
 }
 
 void updateT(std::vector<t1Piece>& t, std::vector<t1Piece> t1){
@@ -288,7 +266,6 @@ void updateTablesVecs(
         const int N) {
     // at row k.
     t1[k].Npars -= numParTrns;
-//    std::cout<<"t1[k].Npars: "<< t1[k].Npars <<std::endl;
     v1[t1[k].PUid] -= numParTrns;
 
     // at row j.
@@ -298,8 +275,6 @@ void updateTablesVecs(
     for(int i=0, ter=v2.size(); i<ter; i++){
         if(N == v1[i])  // get enough particles, so skip this row in t1 or t2.
             v2[i] = false;
-//        if(0 == v1[i])    // receive all the particles.
-//            v2[i] = false;
     }
 
     sort(t1.begin(), t1.end(), t1Sorter);
@@ -307,17 +282,12 @@ void updateTablesVecs(
 
 }
 void evenDis(int num, int& startId, std::vector<int>& v){
-//    std::cout<<"num: "<<num<<std::endl;
     int numProcs = v.size();
     int index = 0;
-//    std::cout << "-------- 1.1 --------" << std::endl;
     for (int j = 0; j<num; j++) {
         v[(startId+j)%numProcs]++; // increment from the back.
-//        std::cout<<"v[j]: "<<v[j%numProcs]<<std::endl;
         index = (startId+j)%numProcs;
-
     }
-//    std::cout << "-------- 1.2 --------" << std::endl;
     startId = index+1;
 }
 
