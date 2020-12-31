@@ -253,36 +253,20 @@ public:
         for(int i=0; i<N; i++){
             idxs[i] = i;
         }
-//        show1DVectorContents(idxs);
-
-//        displace(particle, control_std);
-//        std::cout<<"control_std: "<<control_std<<std::endl;
-//        showPairVectorContents(particle);
-
-//        sampling(frameTesting);
-//        resampling();
-//        showPairVectorContents(particle);
-//        estimation();
-//        showPrediction();
     }
 
     void update(std::vector<std::vector<pix> >* frame){
 
         displace(particle, control_std); //std::cout<< "Pass displace: "<<std::endl;
         sampling(*frame);    //std::cout<< "Pass sampling: "<<std::endl;
-//        resampling();  //std::cout<< "Pass resampling: "<<std::endl;
-//        estimation();   //std::cout<< "Pass estimation: "<<std::endl;
     }
     void calNeff(){
         int ter = totalWeights.size();
-//        std::cout<<"ter: "<< ter <<std::endl;
         double sum = 0.0;
         for(int i=0; i<ter; i++) {
             double temp = totalWeights[i].weight;
-//            std::cout<<"temp: "<< temp <<std::endl;
             sum += temp * temp;
         }
-//        std::cout<<"sum: "<< sum <<std::endl;
         Neff = 1/sum;
     }
 
@@ -297,11 +281,6 @@ public:
     }
 
     void sampling(std::vector<std::vector<pix> > img){
-
-//        face_w = Face.cols;
-//        face_h = Face.rows;
-//        std::cout<<"-> face_w: "<<face_w<<", face_h: "<<face_h<<std::endl;
-
         for(int i=0; i<num_particles; i++){
 
             int leftEdge = particle[i].first - (int)face_w/2;
@@ -322,11 +301,7 @@ public:
 
         }
         oriWeis.assign(weight.begin(), weight.end());   // copy wieght to oriWeis.
-//        std::cout << "----- weights ------" << std::endl;
-//        show1DVectorContents(weight); std::cout<<"\n";
         weiNormalizor(weight);
-//        show1DVectorContents(weight);
-//        std::cout << "--------------------" << std::endl;
     }
 
     void resampling(){
@@ -356,7 +331,6 @@ public:
                     break;
             }
         }
-        // calculate the cumulated weight:
     }
 
     void estimation(){
@@ -371,84 +345,7 @@ public:
         prediction.second = (int)sum_top_edge/num_particles;
         predVec.push_back(prediction);
 
-
-        //2. use the particle with maximum probability.
-//        prediction.first = particle[bestParticleIndex].first;;
-//        prediction.second = particle[bestParticleIndex].second;;
-
     }
-/*
-    void showWindow(Mat& frame, std::pair<int, int> prediction){
-//        std::cout<<"prediction.first: "<<prediction.first<<", prediction.second: "<<prediction.second<<std::endl;
-        Point pt1 = Point_<int>(prediction.first-face_w/2, prediction.second-face_h/2);
-        Point pt2 = Point_<int>(prediction.first+face_w/2, prediction.second+face_h/2);
-        rectangle(frame, pt1, pt2, Scalar(0,255,0), 1, 8, 0);
-
-    }
-
-    void showFace(Mat& frame){
-
-//        Mat RGBFace;
-//        cvtColor(face, RGBFace, COLOR_GRAY2BGR);
-//        RGBFace.copyTo(frame(Rect(0,0,face.cols, face.rows)));
-        face.copyTo(frame(Rect(0,0,face.cols, face.rows)));
-
-    }
-
-    void showParticles(Mat& frame){
-        int radius = 2;
-        const Scalar& color = Scalar(255,255,0);
-        int thickness = -1;
-        for(int i=0; i<num_particles; i++) {
-            Point pt = Point_<int>(particle[i].first, particle[i].second);
-            circle(frame, pt, 2, color, thickness);
-        }
-    }
-
-    void showPatNumber(Mat& frame, const int& timeInterval){
-//        const string& text = ;
-        Point pt = Point_<int>(space_w-260, 20);
-        putText(frame, "Parallel Adaptive Resampling", pt, FONT_HERSHEY_TRIPLEX, 0.5, Scalar(65, 66, 244),1);
-
-        char thre[50];
-        sprintf(thre,"Threshold of Neff: %i",(int)(th));
-        pt = Point_<int>(space_w-260, 40);
-        putText(frame, thre, pt, FONT_HERSHEY_TRIPLEX, 0.5, Scalar(65, 66, 244),1);
-
-        char text[50];
-        sprintf(text,"Number of Particle: %i",num_particles * num_Procs);
-        pt = Point_<int>(space_w-260, 60);
-        putText(frame, text, pt, FONT_HERSHEY_TRIPLEX, 0.5, Scalar(65, 66, 244),1);
-
-        char coreInfo[50];
-        sprintf(coreInfo,"Node Number: %i",num_Procs);
-        pt = Point_<int>(space_w-260, 80);
-        putText(frame, coreInfo, pt, FONT_HERSHEY_TRIPLEX, 0.5, Scalar(65, 66, 244),1);
-
-        char sysNoise[50];
-        sprintf(sysNoise,"System Noise: %2.2f",control_std);
-        pt = Point_<int>(space_w-256, 100);
-        putText(frame, sysNoise, pt, FONT_HERSHEY_TRIPLEX, 0.5, Scalar(65, 66, 244),1);
-
-        char meaNoise[50];
-        sprintf(meaNoise,"Measurement Number: %2.2f",sim_std);
-        pt = Point_<int>(space_w-260, 120);
-        putText(frame, meaNoise, pt, FONT_HERSHEY_TRIPLEX, 0.5, Scalar(65, 66, 244),1);
-
-        char interval[20];
-        sprintf(interval,"K (Local/Glo Ratio): %i",timeInterval);
-        pt = Point_<int>(space_w-260, 140);
-        putText(frame, interval, pt, FONT_HERSHEY_TRIPLEX, 0.5, Scalar(65, 66, 244),1);
-
-    }
-
-    void showPrediction(Mat& frame, const int& timeInterval){
-        showWindow(frame, prediction);
-        showFace(frame);
-        showParticles(frame);
-        showPatNumber(frame, timeInterval);
-    }
-*/
 };
 
 
@@ -496,9 +393,6 @@ void calRMSE(double& RMSE,
         sum += (GT[i].first - predVec[i].first)*(GT[i].first - predVec[i].first) +
         (GT[i].second - predVec[i].second)*(GT[i].second - predVec[i].second);
     }
-    
-    
-    //    cout<<"sum: "<< sum <<endl;
     RMSE = sqrt(sum)/ter;
 }
 
@@ -510,15 +404,10 @@ void makeFace(std::vector<std::vector<pix> > Frame,
               const int height){
 
     Face.assign(height, std::vector<pix>());
-//    cout<<"pass 0.0"<<endl;
     for(int j=0; j<height; j++){
-//        for(int i=x; i<x+width; i++){
-//
-//        }
         std::vector<pix>::iterator beginIterator = Frame[j+y].begin()+x;
         Face[j].assign(beginIterator, beginIterator+width);
     }
-//    cout<<"pass 0.1"<<endl;
 }
 
 #endif //NICKPFTRACKING_PARTICLEFILTER2DCOLOR_H
