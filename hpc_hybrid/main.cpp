@@ -4,9 +4,10 @@
 #include <string>
 #include "particleFilter2D.h"
 
-
 /**********************************************************************************
+ This is the implement of the parallel/distributed particle filtrs.
 
+ Procedures for running the following C++ code:
  1. Compile command:
  mpicxx -w `pkg-config --libs opencv` main.cpp
 
@@ -17,7 +18,7 @@
 
 
 //#define debugging
-c
+
 
 MPI_Datatype createWeightType(){
     MPI_Datatype new_type;
@@ -109,13 +110,6 @@ int main(int argc, char** argv) {
     //    cout<<"pass 0"<<endl;
 
     makeFace(RGBFrame, RGBFace, x, y, width, height);
-
-    //    cout<<"pass 1"<<endl;
-    //    Mat frame;
-    //    RGBToMat(RGBFace, frame);
-    //    imshow("xudong", frame);
-    //    waitKey(3000);
-    //    cout<<"pass 2"<<endl;
     particleFilter2DColor tracker = particleFilter2DColor(RGBFace, x,y, RGBFrame,
             RGBFrame, NumofparticlesPerCore, numProcs, 2, 20, 22, adaptThres); //for ducklings.
 
@@ -144,8 +138,6 @@ while(finishYesNo) {
          // xudong: all processors need to wait for resampling here !!!
 
      //    MPI_Barrier(MPI_COMM_WORLD);    // all processors are waiting here.
-     //
-     //
 
          // resampling as followings:
          // 1. obtain the deWei.
@@ -158,51 +150,17 @@ while(finishYesNo) {
          // 2. assign the space for totalWeight on myRank=0.
          if (0 == myRank) {
              tracker.totalWeights.assign(tracker.num_particles * numProcs, detailWeights());
-     //        &(tracker.totalWeights) = malloc(sizeof(detailWeights) * tracker.num_particles * numProcs);
          }
-
-
-     //    MPI_Barrier(MPI_COMM_WORLD);    // all processors are waiting here.
-     //    for(int i = 0, ter=tracker.num_particles; i<ter; i++){
-     //        std::cout<<myRank<<" -> nodeId: "<<tracker.deWei[i].nodeId
-     //        <<", particleId: "<<tracker.deWei[i].particleId
-     //        <<", weight: "<<tracker.deWei[i].weight<<std::endl;
-     //    }
 
          // 3. copy the deWei on all the PU to CU (myRank=0)
          MPI_Barrier(MPI_COMM_WORLD);    // all processors are waiting here.
          MPI_Gather(&(tracker.deWei.front()), tracker.num_particles, MPI_WEI,
                     &(tracker.totalWeights.front()), tracker.num_particles, MPI_WEI, 0, MPI_COMM_WORLD);
 
-     //    MPI_Barrier(MPI_COMM_WORLD);    // all processors are waiting here.
-     //
-     //    if(0 == myRank) {
-     //        std::cout << "========== checking ======= totalWeights =================" << std::endl;
-     //        for (int i = 0, ter = tracker.totalWeights.size(); i < ter; i++) {
-     //            std::cout << myRank << " -> nodeId: " << tracker.totalWeights[i].nodeId
-     //                      << ", particleId: " << tracker.totalWeights[i].particleId
-     //                      << ", weight: " << tracker.totalWeights[i].weight << std::endl;
-     //        }
-     //    }
-
-
          // 4. normalizing the totalWeights on CU (myRank=0).
-    //        std::cout<<"myRank: "<<myRank<<", tracker.skipGlobal: " << tracker.skipGlobal <<std::endl;
-    //        MPI_Barrier(MPI_COMM_WORLD);
          if (0 == myRank) {
              weiNormalizor(tracker.totalWeights);
          }
-
-     //    if(0 == myRank) {
-     //        std::cout << "========== checking ======= Normalized totalWeights =================" << std::endl;
-     //        for (int i = 0, ter = tracker.totalWeights.size(); i < ter; i++) {
-     //            std::cout << myRank << " -> nodeId: " << tracker.totalWeights[i].nodeId
-     //                      << ", particleId: " << tracker.totalWeights[i].particleId
-     //                      << ", weight: " << tracker.totalWeights[i].weight << std::endl;
-     //        }
-     //    }
-
-
 
          // 5. global resampling on CU (myRank=0) and calculate the 2d vector -> goodParVec.
          if (0 == myRank) {
@@ -220,23 +178,10 @@ while(finishYesNo) {
                      tracker.v2[i] = true;   // find the PU, which need send and receive pars.
                  }
              }
-
-
-     //        std::cout << "1. === checking === goodParVec =====" << std::endl;
-     //        showGoodParVec(tracker.goodParVec);
-     //        std::cout << "1. ============= Finish ============" << std::endl;
              if(checkv1(tracker.v1) != numProcs * NumofparticlesPerCore){
                  std::cout << "Error here, total # of particle = "<< checkgoodParVec(tracker.goodParVec)<<std::endl;
                  break;
              }
-
-     //        for (int i = 0, ter = tracker.goodParVec.size(); i < ter; i++) {
-     //            std::cout << i << " -> # of good parts : " << tracker.goodParVec[i].size() << std::endl;
-     //            for (auto t : tracker.goodParVec[i]) {
-     //                std::cout << "PU: " << i << ", particleId: " << t << std::endl;
-     //            }
-     //            std::cout << std::endl;
-     //        }
          }
 
          //6. sending the size of good particles for those poor PUs, for self-copying.
@@ -278,16 +223,7 @@ while(finishYesNo) {
                               MPI_COMM_WORLD);
                  }
              }
-     //        std::cout << "3. ----------- Finish Sending goodParVec ----------" << std::endl;
-
          }
-
-
- //    if(0 == myRank){
- //        MPI_Barrier(MPI_COMM_WORLD);
- //        std::cout << "----------- Receiving goodParVec ----------" << std::endl;
- //    }
-
          MPI_Barrier(MPI_COMM_WORLD);
          // 9. Receiving the index of good particles for those poor PUs, for self-copying.
          for (int i = 0; i < numProcs; i++) {
@@ -299,16 +235,8 @@ while(finishYesNo) {
                  }
              }
          }
-
- //    for (int i = 0, ter = (int) tracker.selfCopyVec.size(); i < ter; i++) {
- //        if(tracker.selfCopyVec[i] < 0) // do not need to do self-copy, it's either good PU or poor PU with 0 good particle.
- //            break;
- //        std::cout << " 6. myRank: " << myRank << " need to copy it's part with index on it from beginning ->  " << tracker.selfCopyVec[i] << std::endl;
- //    }
-
         tracker.parTemp.assign(tracker.particle.begin(), tracker.particle.end());
      // 10. On poor PUs, rearrange particle according to selfCopyVec.
- //    showPart(numProcs, myRank, tracker.particle, 1);
          if (tracker.selfCopyVecLength < NumofparticlesPerCore && tracker.selfCopyVecLength > 0) {
 
 
@@ -319,13 +247,6 @@ while(finishYesNo) {
 
 
          }
- //    MPI_Barrier(MPI_COMM_WORLD);
- //    showPart(numProcs, myRank, tracker.particle, 2);
-
-
-
-
-
 
         // 11. Clear and  Create t1 and t2 according to goodParVec.
         // s1 and s2 (useless) the vector containing the PUs with surplus and shortage particles.
@@ -341,11 +262,6 @@ while(finishYesNo) {
                  if (Nofpars == NumofparticlesPerCore) {
                      // no particle need to be exchanged.
                  } else if (Nofpars > NumofparticlesPerCore) {
-                     // has surplus particles.
-     //                tracker.s1.push_back(tracker.goodParVec[i]);
-     //                for (int j = 0, ter = tracker.goodParVec[i].size(); j < ter; j++) {
-     //                    tracker.s1[i][j] = tracker.goodParVec[i][j];
-     //                }
                      std::vector<std::pair<int, int> > results;
                      Histogram(tracker.goodParVec[i], results);
 
@@ -356,11 +272,6 @@ while(finishYesNo) {
                          tracker.t1.push_back(t1Piece(PUid, Npars, ParId));
                      }
                  } else {
-                     // has shortage of particles.
-     //                tracker.s2.push_back(tracker.goodParVec[i]);
-     //                for (int j = 0, ter = tracker.goodParVec[i].size(); j < ter; j++) {
-     //                    tracker.s2[i][j] = tracker.goodParVec[i][j];
-     //                }
 
                      int PUid = i;
                      std::vector<int> parEntryidVec;
@@ -371,33 +282,10 @@ while(finishYesNo) {
                      int NumofneededPar = NumofparticlesPerCore - Nofpars;   // must be positive.
                      tracker.t2.push_back(t2Piece(PUid, NumofneededPar, parEntryidVec));
 
-
-     //                typedef std::vector<std::pair<PUid, std::pair<Npars, ParIds> > > t1Map;
-     //                typedef std::vector<std::pair<PUid, std::pair<Npars, std::vector<ParIds> > > > t2Map;
-
-
-
-     //                for (int i = 0, ter = parEntryidVec.size(); i < ter; i++) {
-     //                    std::cout<<parEntryidVec[i]<<", ";
-     //                }
-     //                std::cout<<std::endl;
                  }
              }
-
-     //        showt1Tab(tracker.t1);
-     //        showt2Tab(tracker.t2);
              sort(tracker.t1.begin(), tracker.t1.end(), t1Sorter);
              sort(tracker.t2.begin(), tracker.t2.end(), t2Sorter);
-
-     //        showt1Tab(tracker.t1);
-     //        showt2Tab(tracker.t2);
-     //        std::cout << "------------------ Finish step 11. on PU0 -----------------" << std::endl;
-     //        show1DVectorContents(tracker.v1);
-     //        show1DVectorContents(tracker.v2);
-
-     //        showtSTab(tracker.s1);
-     //        showtSTab(tracker.s2);
-
          }
 
 
@@ -436,32 +324,9 @@ while(finishYesNo) {
 
                  numParTrns = numParTrns < t2Num ? numParTrns : t2Num; //=5.
 
-
-
-
-     //            std::cout << "------------------ 2 -----------------" << std::endl;
-     //            std::cout << "t1Num: " << t1Num << std::endl;
-     //            std::cout << "surNum: " << surNum << std::endl;
-     //            std::cout << "t2Num: " << t2Num << std::endl;
-     //            std::cout << "numParTrns: " << numParTrns << std::endl;
-     //            std::cout << "-> k: " << k << ", j: " << j << std::endl;
-     //            showt1Tab(tracker.t1);
-     //            showt2Tab(tracker.t2);
-     //            std::cout << "v1: size():" << tracker.v1.size() << std::endl;
-     //            show1DVectorContents(tracker.v1);
-     //            std::cout << "v2: size():" << tracker.v2.size() << std::endl;
-     //            show1DVectorContents(tracker.v2);
-
-
                  // add route into TransSchedule:
                  for (int i = 0; i < numParTrns; i++) {
-     //                std::cout << "t1-> PUid: " << tracker.t1[k].PUid << ", ParIds: " << tracker.t1[k].ParIds <<
-     //                          ", t2-> PUid: " << tracker.t2[j].PUid << ", ParIds: " << tracker.t2[j].ParIds.back()
-     //                          << " (";
-     //                for (auto t: tracker.t2[j].ParIds)
-     //                    std::cout << t << ", ";
-     //                std::cout << " )";
-
+  
                      tracker.TransSchedule.push_back(route(tracker.t1[k].PUid, tracker.t1[k].ParIds, 1,
                                                            tracker.t2[j].PUid, tracker.t2[j].ParIds.back(), 1));
 
@@ -472,27 +337,10 @@ while(finishYesNo) {
                          std::cout << " Vector, named ParIds, is Empty, Error here." << std::endl;
      //                    goto label;
                      }
-
-     //                if(! tracker.t2[j].ParIds.empty() ){
-     //                    std::cout << " -> after pop_back the last entry: (";
-     //                    for (auto t: tracker.t2[j].ParIds)
-     //                        std::cout << t << ", ";
-     //                    std::cout << " )";
-     //                }
-
-
-     //                std::cout << std::endl;
                  }
 
 
                  updateTablesVecs(k, j, tracker.t1, tracker.t2, tracker.v1, tracker.v2, numParTrns, NumofparticlesPerCore);
-
-     //            showt1Tab(tracker.t1);
-     //            showt2Tab(tracker.t2);
-     //            std::cout << "v1: " << std::endl;
-     //            show1DVectorContents(tracker.v1);
-     //            std::cout << "v2: " << std::endl;
-     //            show1DVectorContents(tracker.v2);
 
                  int trueNumber = 0;
                  for (int i = 0, ter = tracker.v2.size(); i < ter; i++) {
@@ -542,19 +390,6 @@ while(finishYesNo) {
          MPI_Barrier(MPI_COMM_WORLD);
          // send the TransSchedule.
          MPI_Bcast(&tracker.TransSchedule[0], tracker.TransSchedule.size(), MPI_Route, 0, MPI_COMM_WORLD);
-     //    MPI_Bcast(&tracker.TransSchedule[0], 6, MPI_INT, 0, MPI_COMM_WORLD);
-     //    MPI_Barrier(MPI_COMM_WORLD);
-     //    for (int i = 0; i < numProcs; i++) {
-     //        if(i == myRank){
-     ////            std::cout<<"tracker.SchSize: "<< tracker.SchSize <<std::endl;
-     //            std::cout<<myRank<<" -> tracker.TransSchedule.size(): "<< tracker.TransSchedule.size() <<std::endl;
-     ////            showSch(tracker.TransSchedule, myRank);
-     //        }
-     //    }
-
-     //    if(3 == myRank){
-     //        showSch(tracker.TransSchedule, myRank);
-     //    }
 
 
         // 15. Sending and Receiving particles according to the TransSchedule.
@@ -588,9 +423,6 @@ while(finishYesNo) {
         }
         MPI_Barrier(MPI_COMM_WORLD);
 //     showPairVectorContents(tracker.particle);
-
-
-
  //    showPairVectorContents(tracker.particle);
 
     }
@@ -607,12 +439,6 @@ while(finishYesNo) {
 
 
         // sending...
-//        if(0 == myRank){
-//            std::cout<<"Sending... "<< std::endl;
-//        }
-
-
-
         for (int i = 0; i < (int)precentageLocalTransPars*numProcs*NumofparticlesPerCore; i++) {
             int index1 = randIndex(tracker.num_particles);
 //            std::cout<<"index1: "<< index1 <<std::endl;
@@ -643,10 +469,6 @@ while(finishYesNo) {
 
     }
 
-//    if(0 == myRank){
-//        std::cout<<"End of either global or local "<< std::endl;
-//    }
-
     tracker.estimation();
     MPI_Barrier(MPI_COMM_WORLD);    // all processors are waiting here for following reducing.
 
@@ -656,20 +478,6 @@ while(finishYesNo) {
 
     tracker.timeStep++; // No matter global or local, timeStep = timeStep+1 in every time step.
 
-//    if (0 == myRank) {
-////        std::cout << "------------------- showing image... ----------------" << std::endl;
-//        tracker.showPrediction(frame, timeInterval);
-//        imshow("xudong", frame);
-//    }
-//    waitKey(1);
-//
-//    cap >> frame;
-//    if (frame.empty())
-//        break;
-
-//    if(0 == myRank){
-//        std::cout<<"tracker.timeStep on PU0: "<< tracker.timeStep <<std::endl;
-//    }
     endTimer = MPI_Wtime();
     totalTime += endTimer - startTimer;
     xudongcounter++;
@@ -691,17 +499,6 @@ while(finishYesNo) {
 
     if(0 == myRank){
         calRMSE(tracker.RMSE,tracker.GT,tracker.predVec);
-
-//        std::cout<<"timeComsumption (Second): "<< tracker.timeComsumption << std::endl;
-//        std::cout<<"Number of Time Steps: "<< tracker.timeStep << std::endl;
-//        std::cout<<"Number of PU: "<< tracker.num_Procs << std::endl;
-//        std::cout<<"Number of Particles: "<< tracker.num_particles * tracker.num_Procs << std::endl;
-//        std::cout<<"RMSE: "<< tracker.RMSE << std::endl;
-//        std::cout<<"Neff Threshold: "<< tracker.th << std::endl;
-//        std::cout<<"NofparTrans (global): "<< tracker.NofparTrans << std::endl;
-//        std::cout<<"Number of Par trans between PU (Local): "<< (int)precentageLocalTransPars*numProcs*NumofparticlesPerCore << std::endl;
-//        std::cout<<"timeInterval: "<< timeInterval << std::endl;
-
         writeResultsToLog(std::to_string( tracker.timeComsumption ),
                           std::to_string( tracker.timeStep ),
                           std::to_string( tracker.num_Procs ),
@@ -713,20 +510,8 @@ while(finishYesNo) {
                           std::to_string( timeInterval ),
                           outPutFileName);
     }
-
-//     // When everything done, release the video capture object
-//     cap.~VideoCapture ();
-//     cap.release();
-//     destroyAllWindows();   // Closes all the frames
-
-//    std::cout<<"Pass the end"<<std::endl;
-
-
-
     MPI_Type_free(&MPI_pair);
     MPI_Type_free(&MPI_WEI);
     MPI_Finalize();
-
-
     return 0;
 }
