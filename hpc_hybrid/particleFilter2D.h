@@ -119,25 +119,6 @@ void weiNormalizor(std::vector<detailWeights>& totalWeights){
 
 }
 
-
-//void showInfo(Mat* img, const int & counter){
-//    std::cout<<"-----"<< counter <<"------"<<std::endl;
-//    std::cout<<"1. depth: "<<(*img).depth()<<std::endl;   //-> 0.
-//    std::cout<<"2. cols: "<<(*img).cols<<std::endl;  //-> 1280.
-//    std::cout<<"3. rows: "<<(*img).rows<<std::endl;  //-> 720.
-//    std::cout<<"4. channels: "<<(*img).channels()<<std::endl;    //-> 3.
-//    std::cout<<"5. type: "<<(*img).type()<<std::endl;    //-> 16. CV_8UC3, //-> 0. CV_8UC1
-//    imshow("img", *img);
-//    std::cout<<"-----------"<<std::endl;
-//    waitKey(5000);
-//
-//}
-
-
-
-
-
-
 class particleFilter2DColor {
 public:
     std::vector<std::vector<pix> > face;    // 7. modify.
@@ -223,10 +204,6 @@ public:
         space_w = (int)searchSpace[0].size();   // 8. Modify.
         space_h = (int)searchSpace.size();  // 8. Modify.
 
-//        std::cout<<"face_w: "<<face_w<<std::endl;
-//        std::cout<<"face_h: "<<face_h<<std::endl;
-//        std::cout<<"space_w: "<<space_w<<std::endl;
-//        std::cout<<"space_h: "<<space_h<<std::endl;
 
         // 0. initial s1 and s2:
         GoodParselfCopyVec.assign(N, -1);
@@ -305,7 +282,6 @@ public:
     }
 
     void resampling(){
-//        std::cout<<"Execute Local resampling..."<< std::endl;
         int bestParticleWeight = 0;
         double subSum = 0;
         double step = 1.0/num_particles;
@@ -355,7 +331,6 @@ void selectGoodPars(const std::vector<detailWeights> totalWeights,
 
     double subSum = 0;
     int N_particles = totalWeights.size();
-//    std::cout << "N: " << N_particles <<std::endl;
     double step = 1.0/N_particles;
     int k=1;
     int index = 0;
@@ -364,10 +339,8 @@ void selectGoodPars(const std::vector<detailWeights> totalWeights,
         subSum += totalWeights[i].weight;
 
         for( ; k<=N_particles; k++){
-//            if(subSum >= step * k ){
             if(subSum >= step * k - 0.0001){
                 index++;
-//                std::cout<<"index: "<< index <<", ";
                 if(index > N_particles)
                     break;
                 goodParVec[totalWeights[i].nodeId].push_back(totalWeights[i].particleId);
@@ -378,7 +351,6 @@ void selectGoodPars(const std::vector<detailWeights> totalWeights,
                 break;
         }
     }
-//    std::cout<<std::endl;
 }
 
 void calRMSE(double& RMSE,
